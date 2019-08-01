@@ -1,0 +1,72 @@
+<OmniAuth::Configuration:0x00007fef8f2c9cb0 @camelizations={"cas"=>"CAS"}
+ @path_prefix="/auth"
+ @on_failure=OmniAuth::FailureEndpoint
+ @failure_raise_out_environments=["development"]
+ @before_request_phase=nil
+ @before_callback_phase=nil
+ @before_options_phase=nil
+ @form_css="body {\n  background: #ccc;\n  font-family: \"Lucida Grande\"
+ \"Lucida Sans\"
+ Helvetica
+ Arial
+ sans-serif;\n}\n\nh1 {\n  text-align: center;\n  margin: 30px auto 0px;\n  font-size: 18px;\n  padding: 10px 10px 15px;\n  background: #555;\n  color: white;\n  width: 320px;\n  border: 10px solid #444;\n  border-bottom: 0;\n  -moz-border-radius-topleft: 10px;\n  -moz-border-radius-topright: 10px;\n  -webkit-border-top-left-radius: 10px;\n  -webkit-border-top-right-radius: 10px;\n  border-top-left-radius: 10px;\n  border-top-right-radius: 10px;\n}\n\nh1
+ form {\n  -moz-box-shadow: 2px 2px 7px rgba(0
+0
+0
+0.3);\n  -webkit-box-shadow: 2px 2px 7px rgba(0
+0
+0
+0.3);\n}\n\nform {\n  background: white;\n  border: 10px solid #eee;\n  border-top: 0;\n  padding: 20px;\n  margin: 0px auto 40px;\n  width: 300px;\n  -moz-border-radius-bottomleft: 10px;\n  -moz-border-radius-bottomright: 10px;\n  -webkit-border-bottom-left-radius: 10px;\n  -webkit-border-bottom-right-radius: 10px;\n  border-bottom-left-radius: 10px;\n  border-bottom-right-radius: 10px;\n}\n\nlabel {\n  display: block;\n  font-weight: bold;\n  margin-bottom: 5px;\n}\n\ninput {\n  font-size: 18px;\n  padding: 4px 8px;\n  display: block;\n  margin-bottom: 10px;\n  width: 280px;\n}\n\ninput#identifier
+ input#openid_url {\n  background: url(https://openid.net/images/login-bg.gif) no-repeat;\n  background-position: 0 50%;\n  padding-left: 18px;\n}\n\nbutton {\n  font-size: 22px;\n  padding: 4px 8px;\n  display: block;\n  margin: 20px auto 0;\n}\n\nfieldset {\n  border: 1px solid #ccc;\n  border-left: 0;\n  border-right: 0;\n  padding: 10px 0;\n}\n\nfieldset input {\n  width: 260px;\n  font-size: 16px;\n}\n"
+ @test_mode=false
+ @logger=#<Logger:0x00007fef8f2db5c8 @level=0
+ @progname="omniauth"
+ @default_formatter=#<Logger::Formatter:0x00007fef8f2db500 @datetime_format=nil>
+ @formatter=nil
+ @logdev=#<Logger::LogDevice:0x00007fef8f2db488 @shift_period_suffix=nil
+ @shift_size=nil
+ @shift_age=nil
+ @filename=nil
+ @dev=#<IO:<STDOUT>>
+ @mon_mutex=#<Thread::Mutex:0x00007fef8f2db3e8>
+ @mon_mutex_owner_object_id=70333438024260
+ @mon_owner=nil
+ @mon_count=0>>
+ @allowed_request_methods=[:get
+ :post]
+ @mock_auth={:default=>#<OmniAuth::AuthHash info=#<OmniAuth::AuthHash::InfoHash name="Example User"> provider="default" uid="1234">}>
+
+#############
+<OmniAuth::Strategies::CAS::ServiceTicketValidator:0x00007fc8d8bd2470
+	@options=#<OmniAuth::Strategy::Options callback_url="/callbacks/cas" email_key="email" fetch_raw_info=#<Proc:0x00007fc8d89610d8@/Users/wmotycka/.rvm/gems/ruby-2.6.0/gems/omniauth-cas-1.1.1/lib/omniauth/strategies/cas.rb:37> first_name_key="first_name" host="cse-apps.unl.edu" image_key="image" last_name_key="last_name" location_key="location" login_url="/cas/login" logout_url="/logout" name=:cas name_key="name" nickname_key="user" on_single_sign_out=#<Proc:0x00007fc8d8961448@/Users/wmotycka/.rvm/gems/ruby-2.6.0/gems/omniauth-cas-1.1.1/lib/omniauth/strategies/cas.rb:28> origin_param="origin" path=nil phone_key="phone" port=nil service_validate_url="/cas" setup=false skip_info=false ssl=true uid_field="user">, @uri=#<URI::HTTPS https://cse-apps.unl.edu/cas?service=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fcas%2Fcallback%3Furl&ticket=ST-1564584441rwmDWhW-4hxygZ0uIVV>, @response_body="", @success_body=nil>
+
+
+Ticket granting cookie '#<CASServer::Model::TicketGrantingTicket id: 145451, ticket: "TGC-1564586044rjGa1qBYQrGmYfAPp0Z", created_on: "2019-07-31 10:14:04", client_hostname: "129.93.164.7", username: "wmotycka", extra_attributes: {}>' granted to "wmotycka"
+
+
+------------------------------
+CAS LOG
+
+Processing CASServer::Server::call {"service"=>"http://localhost:3000/auth/cas/callback?url"}
+No ticket granting ticket detected.
+Proceeding with CAS login for service "http://localhost:3000/auth/cas/callback?url".
+Generated login ticket 'LT-1564586012r4WFBJvRZxdc3siC0LB' for client at '129.93.164.7'
+Rendering login form with lt: LT-1564586012r4WFBJvRZxdc3siC0LB, service: http://localhost:3000/auth/cas/callback?url, renew: , gateway: false
+2. guessed login uri: 
+2. form action: /cas/login
+##
+
+Processing CASServer::Server::call {"username"=>"wmotycka", "password"=>"******", "lt"=>"LT-1564586012r4WFBJvRZxdc3siC0LB", "service"=>"http://localhost:3000/auth/cas/callback?url"}
+Validating login ticket 'LT-1564586012r4WFBJvRZxdc3siC0LB'
+Login ticket 'LT-1564586012r4WFBJvRZxdc3siC0LB' successfully validated
+Generated login ticket 'LT-1564586044rcZfLhA3rUktnEKqtOL' for client at '129.93.164.7'
+Logging in with username: wmotycka, lt: LT-1564586044rcZfLhA3rUktnEKqtOL, service: http://localhost:3000/auth/cas/callback?url, auth: [CASServer::Authenticators::ActiveDirectoryLDAP, CASServer::Authenticators::UDB]
+Can't figure out attribute list from nil. This must be an Array of column names or a comma-separated list.
+CASServer::Authenticators::ActiveDirectoryLDAP will try to extract the following extra_attributes: []
+CASServer::Authenticators::ActiveDirectoryLDAP: Did not read any extra_attributes for user "wmotycka" even though an :extra_attributes option was provided.
+Credentials for username 'wmotycka' successfully validated using CASServer::Authenticators::ActiveDirectoryLDAP.
+Generated ticket granting ticket 'TGC-1564586044rjGa1qBYQrGmYfAPp0Z' for user 'wmotycka' at '129.93.164.7'
+Ticket granting cookie '#<CASServer::Model::TicketGrantingTicket id: 145451, ticket: "TGC-1564586044rjGa1qBYQrGmYfAPp0Z", created_on: "2019-07-31 10:14:04", client_hostname: "129.93.164.7", username: "wmotycka", extra_attributes: {}>' granted to "wmotycka"
+Generated service ticket 'ST-1564586044rQH61hh7NFH0vh-WLwM' for service 'http://localhost:3000/auth/cas/callback?url' for user 'wmotycka' at '129.93.164.7'
+Redirecting authenticated user 'wmotycka' at '129.93.164.7' to service 'http://localhost:3000/auth/cas/callback?url'
+

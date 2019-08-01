@@ -1,0 +1,14 @@
+<h1>Content#index (Contents)</h1>
+<div>
+  <% @contents.each do |f| %>
+    <div style="display:block">
+      <%=f.name %>
+      &nbsp;&nbsp;&nbsp;&nbsp;
+      <%= f.content %>
+    </div>
+    <br />
+  <% end %>
+</div>
+<div>
+  <%= link_to "New", new_content_path %>
+</div>
