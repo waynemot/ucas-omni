@@ -10,18 +10,18 @@ class ApplicationController < ActionController::Base
   def authenticate_user!
     Rails.logger.info("app_ctrlr.authenticate_user fired!")
     unless @current_user
-      redirect_to '/auth/cas', alert: "Sign in for access.", location_url: request.env['omniauth.origin'].presence || '/'
+      response.headers["referrer"] = request.env['omniauth.origin']&.presence || '/'
+      redirect_to '/auth/cas', alert: "Sign in for access." # , location_url: request.env['omniauth.origin']&.presence || '/'
     end
   end
 
-  # def after_sign_in_path_for resource_or_scope  # **** DEVISE HELPER PATH *****
-  #   if request.env['omniauth.origin']
-  #     redirect_to request.env['omniauth.origin']
-  #   end
-  # end
-
   def current_user
+    logger.info "DEBUG: current_user: [#{@current_user&.inspect}];"
     @current_user
+  end
+
+  def current_user_logout
+    @current_user = nil
   end
 
   private
