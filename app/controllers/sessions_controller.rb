@@ -12,6 +12,7 @@ class SessionsController < ApplicationController
       logger.info "DEBUG: OK we found the provider and hash in the Authorization table"
       logger.info "DEBUG: @authorization passed: #{@authorization.inspect}"
       set_current_user @authorization
+      redirect_to request.env['omniauth.origin'] || root_url, notice: "#{current_user.login_id} now logged in..."
     else
       logger.info "DEBUG: user not found via authorization. Apply authorization returned to user in omniauth.params"
       if auth_hash['uid']
