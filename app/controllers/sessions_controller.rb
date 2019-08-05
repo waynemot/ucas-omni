@@ -9,7 +9,7 @@ class SessionsController < ApplicationController
     logger.info "DEBUG: auth_hash: #{auth_hash.inspect}"
     @authorization = Authorization.find_by_provider_and_uid(auth_hash["provider"], auth_hash['uid'])
     if @authorization
-      render text: "OK we found the provider and hash in the Authorization table"
+      logger.info "OK we found the provider and hash in the Authorization table"
       current_user @authorization
     else
       logger.info "DEBUG: user not found via authorization. Apply authorization returned to user in omniauth.params"
