@@ -11,7 +11,7 @@ class SessionsController < ApplicationController
     if @authorization
       logger.info "DEBUG: OK we found the provider and hash in the Authorization table"
       logger.info "DEBUG: @authorization passed: #{@authorization.inspect}"
-      current_user @authorization
+      set_current_user @authorization
     else
       logger.info "DEBUG: user not found via authorization. Apply authorization returned to user in omniauth.params"
       if auth_hash['uid']
@@ -28,7 +28,7 @@ class SessionsController < ApplicationController
       user.authorizations.build provider: auth_hash['provider'], uid: auth_hash['uid']
       user.save!
       logger.info "DEBUG: create user with CAS credentials done for user #{user.id}"
-      current_user Authorization.find_by_provider_and_uid(auth_hash['provider'], auth_hash['uid'])
+      set_current_user Authorization.find_by_provider_and_uid(auth_hash['provider'], auth_hash['uid'])
       #logger.info "DEBUG: SessionsCtrlr.create(): Made a new user object with name: #{user.name} and login_id #{user.login_id}"
       if request.env['omniauth.origin']
         logger.info "DEBUG: Redirect to omniauth.origin specified: #{request.env['omniauth.origin']}"

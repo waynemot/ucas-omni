@@ -2,7 +2,7 @@
 # AppCtrlr base for CAS Omniauth
 class ApplicationController < ActionController::Base
 
-  helper_method :current_user
+  helper_method :set_current_user
   helper_method :user_signed_in?
   helper_method :correct_user?
 
@@ -19,6 +19,10 @@ class ApplicationController < ActionController::Base
   #   end
   # end
 
+  def current_user
+    @current_user
+  end
+
   private
 
   def user_signed_in?
@@ -31,7 +35,7 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def current_user (auth)
+  def set_current_user (auth)
     if auth
       begin
         @current_user = User.from_omniauth(auth)
@@ -43,7 +47,4 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def get_current_user
-    return @current_user
-  end
 end
