@@ -5,6 +5,7 @@ class ApplicationController < ActionController::Base
   helper_method :set_current_user
   helper_method :user_signed_in?
   helper_method :correct_user?
+  helper_method :current_user
 
   def authenticate_user!
     Rails.logger.info("app_ctrlr.authenticate_user fired!")
