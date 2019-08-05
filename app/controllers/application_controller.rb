@@ -42,4 +42,8 @@ class ApplicationController < ActionController::Base
       redirect_to root_url, alert: "Invalid Auth passed to App Controller.current_user"
     end
   end
+
+  def get_current_user
+    return @current_user
+  end
 end

@@ -15,6 +15,8 @@ class User < ApplicationRecord
 			user.email = auth.email if auth.email
 			user.name = auth.info.name
 		end
+		logger.info "DEBUG: User.from_omni_auth() returning user: #{user.inspect}"
+		user
 	end
 
 	def add_provider(auth_hash)
