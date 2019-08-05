@@ -31,11 +31,15 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def current_user (auth=request.env['omniauth.auth'])
-    begin
-      @current_user = User.from_omniauth(params['omniauth.auth'])
-    rescue
-      redirect_to root_url, alert: "couldn't find/set @current user from omniauth.auth"
+  def current_user (auth)
+    if auth
+      begin
+        @current_user = User.from_omniauth(auth)
+      rescue
+        redirect_to root_url, alert: "couldn't find/set @current user from passed auth #{auth.inspect}"
+      end
+    else
+      redirect_to root_url, alert: "Invalid Auth passed to App Controller.current_user"
     end
   end
 end
