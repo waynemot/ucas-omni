@@ -7,13 +7,13 @@ class User < ApplicationRecord
 
 	def self.from_omniauth(auth)
 		Rails.logger.info ("DEBUG: User.from_omni_auth() auth: #{auth.inspect}")
-		login_id = auth.info.login_id
-		user = User.find_by_login_id(login_id) if login_id
+		login_id = auth.uid
+		user = User.find auth.user.id
 		user ||= User.create do |user|
 			user.provider = auth.provider
 			user.uid = auth.uid
 			user.email = auth.email if auth.email
-			user.name = auth.info.name
+			user.name = auth.user.name
 		end
 		logger.info "DEBUG: User.from_omni_auth() returning user: #{user.inspect}"
 		user

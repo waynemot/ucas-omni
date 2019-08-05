@@ -21,6 +21,7 @@ class ApplicationController < ActionController::Base
   end
 
   def current_user_logout
+    Authorization.find_by_uid(@current_user.login_id).destroy!
     @current_user = nil
   end
 

@@ -1,7 +1,7 @@
-<% unless user_signed_in? %>
-  <h1>Content#index (Contents)</h1>
+<% if user_signed_in? %>
+  <%=h1 "Contents#index User: #{@user.login_id}" %>>
 <% else %>
-  <%=h1 "Contents#index User: #{current_user.login_id}" %>>
+  <h1>Content#index (Contents)</h1>
 <% end %>
 <div>
   <% @contents.each do |f| %>
