@@ -7,32 +7,37 @@ class ApplicationController < ActionController::Base
   helper_method :correct_user?
   helper_method :current_user
 
+  @session_user = nil
+
   def authenticate_user!
     Rails.logger.info("app_ctrlr.authenticate_user fired!")
-    unless @current_user
-      response.headers["referrer"] = request.env['omniauth.origin']&.presence || '/'
+    logger.info "current_user: #{current_user}"
+
+    unless @session_user
+      response.headers["referer"] = request.env['omniauth.origin']&.presence || '/'
+      session['referer'] = request.env['omniauth.origin']
       redirect_to '/auth/cas', alert: "Sign in for access." # , location_url: request.env['omniauth.origin']&.presence || '/'
     end
   end
 
   def current_user
-    logger.info "DEBUG: current_user: [#{@current_user&.inspect}];"
-    @current_user
+    logger.info "DEBUG: current_user: [#{@session_user&.inspect}];"
+    @session_user
   end
 
   def current_user_logout
-    Authorization.find_by_uid(@current_user.login_id).destroy!
-    @current_user = nil
+    Authorization.find_by_uid(@session_user.login_id).destroy!
+    @session_user = nil
   end
 
   private
 
   def user_signed_in?
-    return true if @current_user
+    return true if @session_user
   end
 
   def correct_user?
-    unless @current_user == @user
+    unless @session_user == @user
       redirect_to root_url, alert: 'Access denied, @current_user != @user...'
     end
   end
@@ -40,7 +45,7 @@ class ApplicationController < ActionController::Base
   def set_current_user (auth)
     if auth
       begin
-        @current_user = User.from_omniauth(auth)
+        @session_user = User.from_omniauth(auth)
       rescue
         redirect_to root_url, alert: "couldn't find/set @current user from passed auth #{auth.inspect}"
       end
