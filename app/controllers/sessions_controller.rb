@@ -4,13 +4,23 @@ class SessionsController < ApplicationController
   end
 
   def create
-    logger.info "DEBUG: SessionCtrlr.create() traversed request keys: #{request.env.keys}"
+    logger.info "DEBUG: SessionCtrlr.create() traversed request.env keys: #{request.env.keys}"
     auth_hash = request.env['omniauth.auth']
     logger.info "DEBUG: auth_hash: #{auth_hash.inspect}"
     @authorization = Authorization.find_by_provider_and_uid(auth_hash["provider"], auth_hash['uid'])
     if @authorization
       logger.info "DEBUG: OK we found the provider and hash in the Authorization table"
       logger.info "DEBUG: @authorization passed: #{@authorization.inspect}"
+      if session[:user_id]
+        if @authorization.user_id == session[:user_id]
+          # REINIT EXISTING SESSION, AUTH & USER ALREADY EXIST
+          logger.info "DEBUG: Session user_id is Authorization user_id, Already Known Session/Authorization"
+          redirect_to request.env['omniauth.origin'].presence || root_url
+        else
+          logger.info "ERROR: Session user != @authorization user -> Mismatching CAS/Application identities"
+          # TODO: ADD CODE TO RESET SESSION FOR NEW USER
+        end
+      end
       set_current_user @authorization
       logger.info "DEBUG: current_user is now: #{current_user.inspect}"
       redirect_to request.env['omniauth.origin'] || root_url, notice: "#{current_user.login_id} now logged in..."
@@ -31,12 +41,12 @@ class SessionsController < ApplicationController
       user.save!
       logger.info "DEBUG: create user with CAS credentials done for user #{user.id}"
       set_current_user Authorization.find_by_provider_and_uid(auth_hash['provider'], auth_hash['uid'])
-      #logger.info "DEBUG: SessionsCtrlr.create(): Made a new user object with name: #{user.name} and login_id #{user.login_id}"
+
       if request.env['omniauth.origin']
         logger.info "DEBUG: Redirect to omniauth.origin specified: #{request.env['omniauth.origin']}"
         redirect_to request.env['omniauth.origin'], method: :get
       else
-        logger.info "DEBUG: omniauth.origin unset in request.env?? #{request.env['omniauth.origin'].inspect}"
+        logger.info "DEBUG: omniauth.ORIGIN UNSET in request.env?? #{request.env['omniauth.origin'].inspect}"
         redirect_to root_url
       end
     end

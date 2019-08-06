@@ -45,7 +45,9 @@ class ApplicationController < ActionController::Base
   def set_current_user (auth)
     if auth
       begin
-        @session_user = User.from_omniauth(auth)
+        session[:authorized_as_user] = auth[:uid]
+        #session[:user] = auth[:uid]
+        @session_user = new Identity (session)
       rescue
         redirect_to root_url, alert: "couldn't find/set @current user from passed auth #{auth.inspect}"
       end
