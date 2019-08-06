@@ -18,12 +18,15 @@ class SessionsController < ApplicationController
           redirect_to request.env['omniauth.origin'].presence || root_url
         else
           logger.info "ERROR: Session user != @authorization user -> Mismatching CAS/Application identities"
-          # TODO: ADD CODE TO RESET SESSION FOR NEW USER
+          # TODO: ADD CODE TO HANDLE HAVE AUTHORIZATION W/O SESSION
+          if @authorization.user_id.nil?
+            logger.info "DEBUG: @authorization.user_id is NULL..."
+          end
         end
       end
-      set_current_user @authorization
+      set_current_user( @authorization, session )
       logger.info "DEBUG: current_user is now: #{current_user.inspect}"
-      redirect_to request.env['omniauth.origin'] || root_url, notice: "#{current_user.login_id} now logged in..."
+      redirect_to request.env['omniauth.origin'].presence || root_url, notice: "#{current_user&.login_id} now logged in..."
     else
       logger.info "DEBUG: user not found via authorization, if valid create new user & build user.authorizations"
       if auth_hash['uid']
@@ -40,7 +43,7 @@ class SessionsController < ApplicationController
       user.authorizations.build provider: auth_hash['provider'], uid: auth_hash['uid']
       user.save!
       logger.info "DEBUG: create user with CAS credentials done for user #{user.id}"
-      set_current_user Authorization.find_by_provider_and_uid(auth_hash['provider'], auth_hash['uid'])
+      set_current_user(Authorization.find_by_provider_and_uid(auth_hash['provider'], auth_hash['uid']), session)
 
       if request.env['omniauth.origin']
         logger.info "DEBUG: Redirect to omniauth.origin specified: #{request.env['omniauth.origin']}"
@@ -54,7 +57,7 @@ class SessionsController < ApplicationController
 
   def logout
     logger.info "DEBUG: sessions.logout() path traversed..."
-    redirect_to 'cse-apps.unl.edu/cas/logout'
+    redirect_to "https://cse-apps.unl.edu/cas/logout?destination=#{root_url}&gateway=true", method: :delete
   end
 
 

@@ -1,5 +1,9 @@
 <% if user_signed_in? %>
-  <%=h1 "Contents#index User: #{@user.login_id}" %>>
+  <% if @user.user.nil? %>
+    <h1>Contents#index User: NULL</h1>
+  <% else %>
+    <%=h1 "Contents#index User: #{@user&.user.login_id}" %>>
+  <% end %>
 <% else %>
   <h1>Content#index (Contents)</h1>
 <% end %>
@@ -15,4 +19,6 @@
 </div>
 <div>
   <%= link_to "New", new_content_path %>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <%= link_to "Logout", auth_logout_path(session), method: :delete %>
 </div>

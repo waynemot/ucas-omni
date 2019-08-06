@@ -10,7 +10,7 @@ class ContentsController < ApplicationController
     Rails.logger.info "DEBUG: new path params: #{params}"
     if params['name'] =='cancel' && params['value'] == 'cancel'
       args = { url: contents_new_url}
-      redirect_to root_url(args), method: :get
+      redirect_to root_url(args), method: :get, origin: 'contents/new'
     end
     @content = Content.new
   end
@@ -26,7 +26,7 @@ class ContentsController < ApplicationController
         c.content = params[:content][:content]
         c.save!
         Rails.logger.info "sending them back to index..."
-        redirect_to root_url, method: :get, flash: 'Content created.'
+        redirect_to root_url, method: :get, alert: 'Content created.'
       end
     end
   end
