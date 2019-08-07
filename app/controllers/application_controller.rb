@@ -10,47 +10,52 @@ class ApplicationController < ActionController::Base
   @session_user
 
   def authenticate_user!
-    Rails.logger.info("app_ctrlr.authenticate_user fired!")
-    logger.info "current_user: #{current_user}"
+    Rails.logger.info("DEBUG: app_ctrlr.authenticate_user fired!")
 
-    if @session_user.nil?
+    if @session_user.nil? || @session_user.empty?
+      Rails.logger.info "DEBUG: session empty or null, redirect to authentication..."
       response.headers["referer"] = request.env['omniauth.origin'].presence || '/'
       session['referer'] = request.env['omniauth.origin']
-      redirect_to '/auth/cas', alert: "Sign in for access."
+      redirect_to users_sign_in_url
+      #redirect_to '/auth/cas', alert: "Sign in for access."
     else
-      logger.info "@session_user exists in authenticate_user!"
+      Rails.logger.info "@session_user exists in authenticate_user!"
       unless @session_user.authorized_as_user.nil?
         if @session_user.authorized_as_user.empty?
-          logger.info "@session_user.authorized_as_user is empty.  "
+          Rails.logger.info "@session_user.authorized_as_user is empty.  "
         end
-        logger.info "@session_user has authorized as user value set: #{@session_user.authorized_as_user}"
+        Rails.logger.info "@session_user has authorized as user value set: #{@session_user.authorized_as_user}"
         session[:authorized_as_user] = @session_user.authorized_as_user
       else
-        logger.info "@session_user.authorized_as_user is '#{@session_user.authorized_as_user}'"
-      end
-      if @session_user.user.nil?
-        logger.info "@session_user.user is NULL..."
+        Rails.logger.info "@session_user.authorized_as_user is _NULL_, so no session. Remove @session_user"
+        @session_user = nil
       end
     end
   end
 
   def current_user
-    if @session_user.nil?
-      @session_user = Identity.new(session)
-    end
+    # if @session_user.nil?
+    #   @session_user = Identity.new(session)
+    # end
     logger.info "DEBUG: current_user: [#{@session_user&.inspect}];"
     @session_user
   end
 
   def current_user_logout
-    Authorization.find_by_uid(@session_user.login_id).destroy!
+    if params[:authenticity_token] && params[:method] == :delete
+      Authorization.destroy(params[:authenticity_token])
+    elsif @session_user && @session_user.login_id
+      Authorization.find_by_uid(@session_user.login_id).destroy!
+    else
+      Rails.logger.info "ERROR: Authentication could not be removed..."
+    end
     @session_user = nil
   end
 
   private
 
   def user_signed_in?
-    return true if @session_user
+    return true if @session_user && @session_user&.authorized_as_user && @session_user&.login_id
   end
 
   def correct_user?
@@ -60,16 +65,14 @@ class ApplicationController < ActionController::Base
   end
 
   def set_current_user (auth, session)
-    # debugger
     logger.info "DEBUG: app_ctrl.set_current_user: auth passed: #{auth.inspect}"
     if auth
       begin
-        session[:authorized_as_user] = auth[:uid]
-        #session[:user] = auth[:uid]
-        @session_user = new Identity(session)
+        session[:authorized_as_user] = auth[:uid]  # :uid = CSE LOGIN ID USED CAS SERVER
+        @session_user = Identity.new(session)
       rescue
         logger.info "DEBUG: OUCH! Rescue fired on session setup"
-        redirect_to root_url, alert: "couldn't find/set @current user from passed auth #{auth.inspect}"
+        #redirect_to root_url, alert: "couldn't find/set @current user from passed auth #{auth.inspect}"
       end
     else
       redirect_to root_url, alert: "Invalid Auth passed to App Controller.current_user"

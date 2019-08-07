@@ -27,9 +27,15 @@ class Identity
       Rails.logger.info "DEBUG: set @authorized_as_user and @user..."
       @authorized_as_user = session[:authorized_as_user]
       Rails.logger.info "DEBUG: @authorized_as_user: #{@authorized_as_user}"
-      @user = User.find(@authorized_as_user)
+      @user = User.find_by_login_id(@authorized_as_user)
     end
     # TODO: APPLY ANY PRIVILEGES AND IMPERSONATIONS
+  end
+
+  def empty?
+    if  @user.nil? || @user.empty? || @authorized_as_user.nil? || @authorized_as_user.empty?
+      true
+    end
   end
 
 end

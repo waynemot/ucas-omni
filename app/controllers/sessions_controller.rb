@@ -1,12 +1,14 @@
 class SessionsController < ApplicationController
-  skip_before_action :verify_authenticity_token, only: :create
+  skip_before_action :verify_authenticity_token, only: %i[create, logout]
   def new
+    logger.info "sess_ctrlr.new() start..."
+    redirect_to "https://cse-apps.unl.edu/cas/login?service=http://localhost:3000/auth/cas/callback&gateway=true"
   end
 
   def create
-    logger.info "DEBUG: SessionCtrlr.create() traversed request.env keys: #{request.env.keys}"
+    logger.info "DEBUG: SessionCtrlr.create() Start..."
     auth_hash = request.env['omniauth.auth']
-    logger.info "DEBUG: auth_hash: #{auth_hash.inspect}"
+    logger.info "DEBUG: session omniauth.auth auth_hash: #{auth_hash.inspect}"
     @authorization = Authorization.find_by_provider_and_uid(auth_hash["provider"], auth_hash['uid'])
     if @authorization
       logger.info "DEBUG: OK we found the provider and hash in the Authorization table"
@@ -25,8 +27,9 @@ class SessionsController < ApplicationController
         end
       end
       set_current_user( @authorization, session )
-      logger.info "DEBUG: current_user is now: #{current_user.inspect}"
-      redirect_to request.env['omniauth.origin'].presence || root_url, notice: "#{current_user&.login_id} now logged in..."
+      logger.info "DEBUG: after set_current_user: current_user is now: #{current_user.inspect}"
+      logger.info "DEBUG: doing redirect to omniauth.origin or root_url: #{request.env['omniauth.origin']}"
+      redirect_to request.env['omniauth.origin'].presence || root_url, notice: "#{current_user.authorized_as_user} now logged in..."
     else
       logger.info "DEBUG: user not found via authorization, if valid create new user & build user.authorizations"
       if auth_hash['uid']
@@ -55,13 +58,20 @@ class SessionsController < ApplicationController
     end
   end
 
+  def signin
+    logger.info "DEBUG: sess_ctrlr.signin() traversed. params: #{params.inspect}"
+    redirect_to "https://cse-apps.unl.edu/cas/login?service=http://localhost:3000/auth/cas/callback?url=http://localhost:3000/"
+  end
+
   def logout
     logger.info "DEBUG: sessions.logout() path traversed..."
+    current_user_logout
     redirect_to "https://cse-apps.unl.edu/cas/logout?destination=#{root_url}&gateway=true", method: :delete
   end
 
 
   def failure
-    redirect_to root_url, alert: "CAS OmniAuth Authentication error: #{params[:message].humanize}"
+    redirect_to login_url
+    # redirect_to root_url, alert: "CAS OmniAuth Authentication error: #{params[:message].humanize}"
   end
 end

@@ -2,7 +2,9 @@
   <% if @user.user.nil? %>
     <h1>Contents#index User: NULL</h1>
   <% else %>
-    <%=h1 "Contents#index User: #{@user&.user.login_id}" %>>
+    <h1>
+      <%= "Contents#index User: #{@user&.user.login_id}"%>
+    </h1>
   <% end %>
 <% else %>
   <h1>Content#index (Contents)</h1>
