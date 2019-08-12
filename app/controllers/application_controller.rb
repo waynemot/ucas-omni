@@ -7,16 +7,40 @@ class ApplicationController < ActionController::Base
   helper_method :correct_user?
   helper_method :current_user
 
-  @session_user
+  # @session_user
 
   def authenticate_user!
     Rails.logger.info("DEBUG: app_ctrlr.authenticate_user fired!")
 
-    if @session_user.nil? || @session_user.empty?
+    if current_user.nil? || current_user.empty? #@session_user.nil? || @session_user.empty?
       Rails.logger.info "DEBUG: session empty or null, redirect to authentication..."
-      response.headers["referer"] = request.env['omniauth.origin'].presence || '/'
-      session['referer'] = request.env['omniauth.origin']
-      redirect_to users_sign_in_url
+      if session['current_user'].present?
+        Rails.logger.info "SESSION[current_user] present"
+        curr = session['current_user']
+        Rails.logger.info "contents of current_user: #{curr.inspect}"
+        @session_user = curr
+        unless @session_user.authorized_as_user.nil?
+          if @session_user.authorized_as_user.empty?
+            Rails.logger.info "DEBUG: current_user was nil, have session[current_user] but authorized_as_user is empty..."
+          end
+          if session['authorized_as_user'].present?
+            Rails.logger.info "DEBUG: HOWEVER, session has authorized as user present: #{session['authorized_as_user']}"
+          end
+        end
+      end
+      Rails.logger.info "DEBUG: omniauth.origin: '#{request.env['omniauth.origin']}'"
+      Rails.logger.info "DEBUG: request.env[REQUEST_PATH]: #{request.env["REQUEST_PATH"] }"
+      destpath = "/"
+      if request.env['omniauth.origin']
+        destpath=request.env['omniauth.origin']
+      elsif request.env["REQUEST_PATH"].present?
+        destpath=request.env["REQUEST_PATH"]
+      end
+      session['destination'] = destpath
+      #response.headers["referer"] = request.env['omniauth.origin'].presence || '/'
+      #session['referer'] = request.env['omniauth.origin']
+      #redirect_to users_sign_in_url
+      redirect_to "https://cse-apps.unl.edu/cas/login?service=http://localhost:3000/auth/cas/callback&url=#{destpath}"
       #redirect_to '/auth/cas', alert: "Sign in for access."
     else
       Rails.logger.info "@session_user exists in authenticate_user!"
@@ -27,7 +51,7 @@ class ApplicationController < ActionController::Base
         Rails.logger.info "@session_user has authorized as user value set: #{@session_user.authorized_as_user}"
         session[:authorized_as_user] = @session_user.authorized_as_user
       else
-        Rails.logger.info "@session_user.authorized_as_user is _NULL_, so no session. Remove @session_user"
+        Rails.logger.info "@session_user.authorized_as_user is _NULL_, so no session. REMOVE @SESSION_USER !!!!!!!"
         @session_user = nil
       end
     end

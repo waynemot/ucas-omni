@@ -1,8 +1,8 @@
 class SessionsController < ApplicationController
   skip_before_action :verify_authenticity_token, only: %i[create, logout]
   def new
-    logger.info "sess_ctrlr.new() start..."
-    redirect_to "https://cse-apps.unl.edu/cas/login?service=http://localhost:3000/auth/cas/callback&gateway=true"
+    #redirect_to "https://cse-apps.unl.edu/cas/login?service=http://localhost:3000/auth/cas/callback&gateway=true"
+    redirect_to '/auth/cas'
   end
 
   def create
@@ -28,8 +28,15 @@ class SessionsController < ApplicationController
       end
       set_current_user( @authorization, session )
       logger.info "DEBUG: after set_current_user: current_user is now: #{current_user.inspect}"
-      logger.info "DEBUG: doing redirect to omniauth.origin or root_url: #{request.env['omniauth.origin']}"
-      redirect_to request.env['omniauth.origin'].presence || root_url, notice: "#{current_user.authorized_as_user} now logged in..."
+      logger.info "DEBUG: REQUEST[omniauth.origin]: #{request.env['omniauth.origin']}"
+      logger.info "DEBUG: SESSION[destination]: #{session["destination"]}"
+      session['current_user'] = current_user
+      if session['destination'].present?
+        redirect_to session['destination'], notice: "#{current_user.authorized_as_user} now logged in..."
+      else
+        logger.info "DEBUG: session[dest] unset, redirecting to -> omniauth.origin or root_url path..."
+        redirect_to request.env['omniauth.origin'].presence || root_url, notice: "#{current_user.authorized_as_user} now logged in..."
+      end
     else
       logger.info "DEBUG: user not found via authorization, if valid create new user & build user.authorizations"
       if auth_hash['uid']
