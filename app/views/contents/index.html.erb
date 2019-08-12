@@ -22,5 +22,9 @@
 <div>
   <%= link_to "New", new_content_path %>
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <%= link_to "Logout", auth_logout_path(session), method: :delete %>
+  <% if user_signed_in? %>
+    <%= link_to "Logout", auth_logout_path(session), method: :delete %>
+  <% else %>
+    <%= link_to "Login", '/auth/cas' %>
+  <% end %>
 </div>

@@ -2,6 +2,7 @@ class SessionsController < ApplicationController
   skip_before_action :verify_authenticity_token, only: %i[create, logout]
   def new
     #redirect_to "https://cse-apps.unl.edu/cas/login?service=http://localhost:3000/auth/cas/callback&gateway=true"
+    logger.info "DEBUG: sess_ctrlr.new() redirect to /auth/cas"
     redirect_to '/auth/cas'
   end
 
@@ -58,6 +59,8 @@ class SessionsController < ApplicationController
       if request.env['omniauth.origin']
         logger.info "DEBUG: Redirect to omniauth.origin specified: #{request.env['omniauth.origin']}"
         redirect_to request.env['omniauth.origin'], method: :get
+      elsif session['destination']
+        redirect_to session['destination'], method: :get
       else
         logger.info "DEBUG: omniauth.ORIGIN UNSET in request.env?? #{request.env['omniauth.origin'].inspect}"
         redirect_to root_url
