@@ -29,20 +29,20 @@ class ApplicationController < ActionController::Base
             logger.info "session[destination]: #{session['destination']}"
             logger.info "request[referer]: '#{request[:referer]}'"
             unless session['destination'].nil?
-              redirect_to session['destination']
+              udest = session['destination']
+              session['destination'] = nil
+              redirect_to udest
             end
           end
         end
       end
       Rails.logger.info "DEBUG: omniauth.origin: '#{request.env['omniauth.origin']}'"
       Rails.logger.info "DEBUG: request.env[REQUEST_PATH]: #{request.env["REQUEST_PATH"] }"
-      destpath = "/"
-      if request.env['omniauth.origin']
-        destpath=request.env['omniauth.origin']
-      elsif request.env["REQUEST_PATH"].present?
-        destpath=request.env["REQUEST_PATH"]
-      end
-      session['destination'] = destpath
+      
+      service_url = request[:referer].presence || request.env['omniauth.origin'].presence || root_url
+      session['destination'] = service_url
+      redirect_to "https://cse-apps.unl.edu/cas/login?service=#{auth_cas_callback_url}&url=#{service_url}"
+
       #response.headers["referer"] = request.env['omniauth.origin'].presence || '/'
       #session['referer'] = request.env['omniauth.origin']
       #redirect_to users_sign_in_url
@@ -82,15 +82,22 @@ class ApplicationController < ActionController::Base
     if @session_user.nil? && session['current_user']
       @session_user = session['current_user']
     end
-    if params['authenticity_token']
-      @authorization = Authorization.find_by_user_id (@session_user['user']['login_id'])
-      @authorization.destroy! if @authorization
+    if request.env['authenticity_token']
+      logger.info "DEBUG: request.env has auth_token..."
+    end
+    @user_id = @session_user['user']['id'] if @session_user
+    user = User.find(@user_id)&
+    user.destroy! if user
+    #@authorization = Authorization.find_by_user_id (@session_user['user']['login_id'])
+    #@authorization.user.destroy!
+    #@authorization.destroy! if @authorization
+    session.destroy
       #Authorization.destroy(@session_user['user']['login_id'])
     #elsif @session_user && @session_user.login_id
     #  Authorization.find_by_uid(@session_user['user']['login_id']).destroy!
-    else
-      Rails.logger.info "ERROR: Authentication could not be removed..."
-    end
+    #else
+      #Rails.logger.info "ERROR: Authentication could not be removed..."
+    #end
     @session_user = nil
   end
 
@@ -99,10 +106,11 @@ class ApplicationController < ActionController::Base
   def user_signed_in?
     if @session_user.nil?
       if session['current_user']
+        logger.info "DEBUG: user_signed_in has nil @session_user and session[curr_user] is present #{session['current_user']}"
         @session_user = session['current_user']
       end
     end
-    return true if @session_user && @session_user['authorized_as_user'] && @session_user['login_id']
+    return true if @session_user && @session_user['authorized_as_user'] && @session_user['user']['login_id']
   end
 
   def correct_user?

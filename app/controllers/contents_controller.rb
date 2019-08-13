@@ -2,7 +2,7 @@ class ContentsController < ApplicationController
   before_action :authenticate_user!, except: [:index]
 
   def index
-    @user
+    @user = current_user["user"] if current_user
     @contents = Content.all
   end
 

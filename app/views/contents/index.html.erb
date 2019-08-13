@@ -1,9 +1,9 @@
 <% if user_signed_in? %>
-  <% if @user.user.nil? %>
+  <% if @user['id'].nil? %>
     <h1>Contents#index User: NULL</h1>
   <% else %>
     <h1>
-      <%= "Contents#index User: #{@user&.user.login_id}"%>
+      <%= "Contents#index User: #{@user['login_id']}"%>
     </h1>
   <% end %>
 <% else %>

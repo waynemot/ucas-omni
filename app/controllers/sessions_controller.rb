@@ -32,7 +32,9 @@ class SessionsController < ApplicationController
       logger.info "DEBUG: REQUEST[omniauth.origin]: #{request.env['omniauth.origin']}"
       logger.info "DEBUG: SESSION[destination]: #{session["destination"]}"
       session['current_user'] = current_user
-      if session['destination'].present?
+      if request.env['omniauth.origin']
+        redirect_to request.env['omniauth.origin'], notice: "#{current_user.authorized_as_user} now logged in..."
+      elsif session['destination'].present?
         redirect_to session['destination'], notice: "#{current_user.authorized_as_user} now logged in..."
       else
         logger.info "DEBUG: session[dest] unset, redirecting to -> omniauth.origin or root_url path..."
@@ -70,6 +72,8 @@ class SessionsController < ApplicationController
 
   def signin
     logger.info "DEBUG: sess_ctrlr.signin() traversed. params: #{params.inspect}"
+    # TODO: This may not be the proper way to access the cas server, and the service path needs composing for production
+    # composing the service and url
     redirect_to "https://cse-apps.unl.edu/cas/login?service=http://localhost:3000/auth/cas/callback?url=http://localhost:3000/"
   end
 
@@ -77,11 +81,12 @@ class SessionsController < ApplicationController
     logger.info "DEBUG: sessions.logout() path traversed..."
     current_user_logout
     redirect_to "https://cse-apps.unl.edu/cas/logout?destination=#{root_url}&gateway=true", method: :delete
+    #redirect_to root_url
   end
 
 
   def failure
-    redirect_to login_url
-    # redirect_to root_url, alert: "CAS OmniAuth Authentication error: #{params[:message].humanize}"
+    #redirect_to login_url
+    redirect_to root_url, alert: "CAS OmniAuth Authentication error: #{params[:message].humanize}"
   end
 end
